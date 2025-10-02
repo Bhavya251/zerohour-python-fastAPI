@@ -126,13 +126,13 @@ CORS_ORIGINS=http://localhost:3000,https://yourdomain.com
 ### Running the Server
 ```bash
 # Development server with auto-reload
-uvicorn server:app --host 0.0.0.0 --port 8001 --reload
+uvicorn main:app --host 0.0.0.0 --port 8001 --reload
 
 # Production server
-uvicorn server:app --host 0.0.0.0 --port 8001
+uvicorn main:app --host 0.0.0.0 --port 8001
 
 # With specific number of workers
-uvicorn server:app --host 0.0.0.0 --port 8001 --workers 4
+uvicorn main:app --host 0.0.0.0 --port 8001 --workers 4
 ```
 
 ### Verify Installation
@@ -441,19 +441,14 @@ class ConnectionManager:
 
     async def send_message_to_chat(self, message: dict, chat_id: str):
         # Broadcast message to all chat participants
-        chat = await db.chats.find_one({"chat_id": chat_id})
-        if chat:
-            for participant_id in chat.get("participants", []):
-                if participant_id in self.active_connections:
-                    await self.active_connections[participant_id].send_text(json.dumps(message))
+        
 ```
 
 ### Authentication Middleware
 ```python
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
-        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
+        # Check credentials and decode Auth token & verify
         if username is None:
             raise HTTPException(status_code=401, detail="Invalid authentication credentials")
     except jwt.PyJWTError:
@@ -469,8 +464,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 ```python
 from passlib.context import CryptContext
 
-# Password encryption using pbkdf2_sha256 (more compatible than bcrypt)
-pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+# Password encryption using pbkdf2_sha256
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -488,54 +482,18 @@ import uuid
 
 class User(BaseModel):
     user_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    first_name: str
-    last_name: str
-    mobile_no: str
-    email: EmailStr
-    username: str
-    security_phrase: str
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    is_online: bool = False
+    # All other fields
 
 class Chat(BaseModel):
     chat_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    participants: List[str]  # List of user_ids
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    last_message: Optional[str] = None
-    last_message_time: Optional[datetime] = None
+    # All other fields
 
 class Message(BaseModel):
     message_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    chat_id: str
-    sender_id: str
-    content: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
-    message_type: str = "text"  # text, image, file
+    # All other fields
 ```
 
 ## 🚀 Performance Optimizations
-
-### Database Indexing
-```python
-# Recommended MongoDB indexes
-db.users.create_index("username", unique=True)
-db.users.create_index("email", unique=True)
-db.users.create_index([("first_name", 1), ("last_name", 1)])
-db.chats.create_index("participants")
-db.messages.create_index([("chat_id", 1), ("timestamp", 1)])
-```
-
-### Connection Pooling
-```python
-# MongoDB connection with pooling
-client = AsyncIOMotorClient(
-    mongo_url,
-    maxPoolSize=50,
-    minPoolSize=5,
-    maxIdleTimeMS=30000,
-    serverSelectionTimeoutMS=5000
-)
-```
 
 ### Async Operations
 ```python
@@ -632,7 +590,6 @@ import os
 
 # Security
 SECRET_KEY = os.environ.get("SECRET_KEY", "change-this-in-production")
-ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # Database
@@ -723,18 +680,8 @@ import jwt
 
 # Check if SECRET_KEY is consistent
 SECRET_KEY = "your-secret-key"
-token = jwt.encode({"sub": "username"}, SECRET_KEY, algorithm="HS256")
-decoded = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-```
-
-**Password Hashing Error**
-```python
-# If bcrypt fails, use pbkdf2_sha256
-from passlib.context import CryptContext
-
-pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
-hashed = pwd_context.hash("password")
-verified = pwd_context.verify("password", hashed)
+token = jwt.encode({"sub": "username"}, SECRET_KEY, algorithm="<Algo>")
+decoded = jwt.decode(token, SECRET_KEY, algorithms=["<Algo>"])
 ```
 
 ### Debug Mode
