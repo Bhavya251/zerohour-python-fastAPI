@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 from auth.routes import router as auth_router
@@ -6,6 +6,8 @@ from chat.websocket import websocket_endpoint
 from chat.routes import router as chat_router
 from users.routes import router as user_router
 from database import close_db
+from erroremail import send_error_email
+import traceback
 
 app = FastAPI(title="ZeroHour Chat API", version="1.0.0", debug=True)
 
@@ -40,3 +42,36 @@ async def shutdown_event():
 
 # Register WebSocket manually
 app.websocket("/ws/{user_id}")(websocket_endpoint)
+
+
+@app.middleware("http")
+async def error_email_middleware(request: Request, call_next):
+    """Catch all responses and send email on 3xx/4xx/5xx with full traceback."""
+    try:
+        response = await call_next(request)
+
+        # For HTTP errors (e.g., raised via HTTPException)
+        if 300 <= response.status_code < 600:
+            body = (
+                f"URL: {request.url}\n"
+                f"Method: {request.method}\n"
+                f"Status Code: {response.status_code}\n"
+                f"Full Traceback:\n{traceback.format_exc()}"
+            )
+            send_error_email(f"🚨 FastAPI Error {response.status_code}", body)
+
+        return response
+
+    except Exception as e:
+        # Catch unhandled exceptions
+        tb = traceback.format_exc()
+        body = (
+            f"URL: {request.url}\n"
+            f"Method: {request.method}\n"
+            f"Error: {str(e)}\n\n"
+            f"Full Traceback:\n{tb}"
+        )
+        send_error_email("🚨 FastAPI Unhandled Exception", body)
+        raise
+
+
