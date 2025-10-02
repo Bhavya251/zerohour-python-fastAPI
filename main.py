@@ -7,7 +7,7 @@ from chat.routes import router as chat_router
 from users.routes import router as user_router
 from database import close_db
 
-app = FastAPI(title="ZeroHour Chat API", version="1.0.0")
+app = FastAPI(title="ZeroHour Chat API", version="1.0.0", debug=True)
 
 app.include_router(auth_router)
 app.include_router(user_router)
