@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from starlette.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 import logging
 from auth.routes import router as auth_router
 from chat.websocket import websocket_endpoint
@@ -20,8 +20,8 @@ async def root():
 
 # Allow origins (frontend URLs)
 origins = [
-    "http://localhost:3000",  # React local
     "https://zerohour-react.vercel.app/",  # deployed React app
+    "http://localhost:3000"  # React local
 ]
 
 app.add_middleware(
