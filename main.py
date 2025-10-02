@@ -5,7 +5,6 @@ from auth.routes import router as auth_router
 from chat.websocket import websocket_endpoint
 from chat.routes import router as chat_router
 from users.routes import router as user_router
-from database import close_db
 from erroremail import send_error_email
 import traceback
 
@@ -22,7 +21,7 @@ async def root():
 
 # Allow origins (frontend URLs)
 origins = [
-    "https://zerohour-react.vercel.app/",  # deployed React app
+    "https://zerohour-react.vercel.app",  # deployed React app
     "http://localhost:3000"  # React local
 ]
 
@@ -36,9 +35,9 @@ app.add_middleware(
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-@app.on_event("shutdown")
-async def shutdown_event():
-    await close_db()
+# @app.on_event("shutdown")
+# async def shutdown_event():
+#     await close_db()
 
 # Register WebSocket manually
 app.websocket("/ws/{user_id}")(websocket_endpoint)

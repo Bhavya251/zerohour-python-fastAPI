@@ -10,7 +10,6 @@ load_dotenv(ROOT_DIR / '.env')
 MONGO_USER = os.getenv("MONGO_USER")
 MONGO_PASSWORD = os.getenv("MONGO_PASSWORD")
 mongo_url = f"mongodb+srv://{MONGO_USER}:{MONGO_PASSWORD}@zero-hour.gskxdlj.mongodb.net/?retryWrites=true&w=majority&appName=zero-hour"
-client = AsyncIOMotorClient(mongo_url)
 db = os.environ['DB_NAME']
 
 # JWT and Password settings
