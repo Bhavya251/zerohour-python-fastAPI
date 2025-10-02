@@ -17,10 +17,17 @@ app.include_router(chat_router)
 async def root():
     return {"message": "ZeroHour Chat API is running!"}
 
+
+# Allow origins (frontend URLs)
+origins = [
+    "http://localhost:3000",  # React local
+    "https://zerohour-react.vercel.app/",  # deployed React app
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
