@@ -51,7 +51,7 @@ async def error_email_middleware(request: Request, call_next):
         response = await call_next(request)
 
         # For HTTP errors (e.g., raised via HTTPException)
-        if 300 <= response.status_code < 600:
+        if 300 <= response.status_code < 600 and request.method != 'OPTIONS':
             body = (
                 f"URL: {request.url}\n"
                 f"Method: {request.method}\n"
