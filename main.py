@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 from auth.routes import router as auth_router
-from chat.websocket import websocket_endpoint
+#from chat.websocket import websocket_endpoint
 from chat.routes import router as chat_router
 from users.routes import router as user_router
 from erroremail import send_error_email
