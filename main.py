@@ -48,9 +48,9 @@ async def error_email_middleware(request: Request, call_next):
     """Catch all responses and send email on 3xx/4xx/5xx with full traceback."""
     try:
         response = await call_next(request)
-
+        urlString = request.url
         # For HTTP errors (e.g., raised via HTTPException)
-        if (300 <= response.status_code < 600 and response.status_code != 307 and "/ws/" not in request.url
+        if (300 <= response.status_code < 600 and response.status_code != 307 and "/ws/" not in urlString
                 and request.method != 'OPTIONS'):
             body = (
                 f"URL: {request.url}\n"
