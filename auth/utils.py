@@ -25,7 +25,7 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
 
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> UserOut:
-    db = get_db()
+    db = await get_db()
     try:
         payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")

@@ -1,11 +1,12 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 from config import mongo_url, db_name
 
-_client = AsyncIOMotorClient(mongo_url)
+async def get_db():
+    """Return a database instance per request."""
+    client = AsyncIOMotorClient(mongo_url)
+    db = client[db_name]
+    return db
 
-def get_db():
-    """Return the database instance."""
-    return _client[db_name]
 
 # async def close_db():
 #     client.close()

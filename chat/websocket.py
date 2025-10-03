@@ -16,7 +16,7 @@ class ConnectionManager:
         self.active_connections.pop(user_id, None)
 
     async def send_message_to_chat(self, message: dict, chat_id: str):
-        db = get_db()
+        db = await get_db()
         chat = await db.chats.find_one({"chat_id": chat_id})
         if chat:
             for participant_id in chat.get("participants", []):
@@ -41,7 +41,7 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 async def websocket_endpoint(websocket: WebSocket, user_id: str):
-    db = get_db()
+    db = await get_db()
     await manager.connect(websocket, user_id)
     try:
         while True:

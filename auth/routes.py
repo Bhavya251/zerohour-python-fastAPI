@@ -10,7 +10,7 @@ router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
 @router.post("/register", response_model=Token)
 async def register_user(user_data: UserRegister):
-    db = get_db()
+    db = await get_db()
     existing_user = await db.users.find_one({
         "$or": [{"username": user_data.username}, {"email": user_data.email}]
     })
@@ -34,7 +34,7 @@ async def register_user(user_data: UserRegister):
 
 @router.post("/login", response_model=Token)
 async def login_user(credentials: UserLogin):
-    db = get_db()
+    db = await get_db()
     user = await db.users.find_one({"username": credentials.username})
     if not user or not verify_password(credentials.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Incorrect username or password")
@@ -54,6 +54,6 @@ async def login_user(credentials: UserLogin):
 
 @router.post("/logout")
 async def logout_user(current_user: UserOut = Depends(get_current_user)):
-    db = get_db()
+    db = await get_db()
     await db.users.update_one({"user_id": current_user.user_id}, {"$set": {"is_online": False}})
     return {"message": "Successfully logged out"}
