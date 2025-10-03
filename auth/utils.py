@@ -4,7 +4,7 @@ from passlib.context import CryptContext
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from config import SECRET_KEY, ALGORITHM
-from database import db
+from database import get_db
 from auth.customPydantic import UserOut
 
 security = HTTPBearer()
@@ -25,6 +25,7 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
 
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> UserOut:
+    db = get_db()
     try:
         payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
