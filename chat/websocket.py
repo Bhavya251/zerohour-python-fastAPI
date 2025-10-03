@@ -5,15 +5,15 @@ from chat.models import Message
 from bson import ObjectId
 
 class ConnectionManager:
-    def __init__(self):
-        self.active_connections = {}
-
-    async def connect(self, websocket: WebSocket, user_id: str):
-        await websocket.accept()
-        self.active_connections[user_id] = websocket
-
-    def disconnect(self, user_id: str):
-        self.active_connections.pop(user_id, None)
+    # def __init__(self):
+    #     self.active_connections = {}
+    #
+    # async def connect(self, websocket: WebSocket, user_id: str):
+    #     await websocket.accept()
+    #     self.active_connections[user_id] = websocket
+    #
+    # def disconnect(self, user_id: str):
+    #     self.active_connections.pop(user_id, None)
 
     async def send_message_to_chat(self, message: dict, chat_id: str):
         db = await get_db()
