@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from database import db
+from database import get_db
 from auth.models import User
 from auth.utils import get_current_user
 
@@ -9,6 +9,7 @@ router = APIRouter(prefix="/api/users", tags=["Users"])
 # User endpoints
 @router.get("/search")
 async def search_users(query: str, current_user: User = Depends(get_current_user)):
+    db = get_db()
     users = await db.users.find({
         "$and": [
             {"user_id": {"$ne": current_user.user_id}},

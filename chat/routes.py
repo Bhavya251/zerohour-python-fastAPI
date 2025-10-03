@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List
-from database import db
+from database import get_db
 from auth.models import User
 from chat.models import Chat
 from auth.utils import get_current_user
@@ -11,6 +11,7 @@ router = APIRouter(prefix="/api/chats", tags=["Chat"])
 # Chat endpoints
 @router.post("/create")
 async def create_chat(other_user_id: str, current_user: UserOut = Depends(get_current_user)):
+    db = get_db()
     # Check if chat already exists between these users
     existing_chat = await db.chats.find_one({
         "participants": {"$all": [current_user.user_id, other_user_id]}
@@ -27,6 +28,7 @@ async def create_chat(other_user_id: str, current_user: UserOut = Depends(get_cu
 
 @router.get("/", response_model=List[dict])
 async def get_user_chats(current_user: UserOut = Depends(get_current_user)):
+    db = get_db()
     # Fetch chats where current user is a participant
     chats = await db.chats.find({
         "participants": current_user.user_id
@@ -75,6 +77,7 @@ async def get_user_chats(current_user: UserOut = Depends(get_current_user)):
 
 @router.get("/{chat_id}/messages", response_model=List[dict])
 async def get_chat_messages(chat_id: str, current_user: User = Depends(get_current_user)):
+    db = get_db()
     # Verify user is participant in chat
     chat = await db.chats.find_one({"chat_id": chat_id})
     if not chat or current_user.user_id not in chat["participants"]:
