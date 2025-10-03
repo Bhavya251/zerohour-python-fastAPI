@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 from auth.routes import router as auth_router
-#from chat.websocket import websocket_endpoint
+from chat.websocket import sse_endpoint, send_message_endpoint  # Import SSE functions
 from chat.routes import router as chat_router
 from users.routes import router as user_router
 from erroremail import send_error_email
@@ -35,12 +35,18 @@ app.add_middleware(
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-# @app.on_event("shutdown")
-# async def shutdown_event():
-#     await close_db()
+# Register SSE endpoint
+@app.get("/sse/{user_id}")
+async def sse(request: Request, user_id: str):
+    """Server-Sent Events endpoint for real-time messages"""
+    return await sse_endpoint(request, user_id)
 
-# Register WebSocket manually
-#app.websocket("/ws/{user_id}")(websocket_endpoint)
+# Register send message endpoint
+@app.post("/api/send/{user_id}")
+async def send_message(user_id: str, message_request: dict):
+    """Send a message to a chat"""
+    from chat.websocket import SendMessageRequest
+    return await send_message_endpoint(user_id, SendMessageRequest(**message_request))
 
 
 @app.middleware("http")
